@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import io.f12.notionlinkedblog.domain.dummy.DummyObject;
 import io.f12.notionlinkedblog.domain.user.User;
@@ -26,6 +27,9 @@ class UserServiceTests extends DummyObject {
 
 	@Mock
 	private UserRepository userRepository;
+
+	@Mock
+	private PasswordEncoder passwordEncoder;
 
 	@DisplayName("유저 이메일 기반 회원가입")
 	@Nested
