@@ -6,8 +6,10 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,7 +27,8 @@ public class UserApiController {
 
 	@PostMapping("/email/signup")
 	public ResponseEntity<UserSignupResponseDto> signupByEmail(
-		@Validated UserSignupRequestDto requestDto,
+		@RequestBody @Validated UserSignupRequestDto requestDto,
+		BindingResult bindingResult,
 		HttpSession httpSession) {
 		boolean emailVerified = (boolean)httpSession.getAttribute(emailVerifiedAttr);
 

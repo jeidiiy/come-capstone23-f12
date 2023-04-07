@@ -6,8 +6,9 @@ import javax.validation.constraints.NotNull;
 import io.f12.notionlinkedblog.domain.user.User;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Builder
+@NoArgsConstructor
 @Data
 public class UserSignupRequestDto {
 	@NotNull
@@ -23,6 +24,13 @@ public class UserSignupRequestDto {
 	private String blogTitle;
 	private String githubLink;
 	private String instagramLink;
+
+	@Builder
+	public UserSignupRequestDto(String username, String email, String password) {
+		this.username = username;
+		this.email = email;
+		this.password = password;
+	}
 
 	public User toEntity() {
 		return User.builder()
