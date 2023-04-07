@@ -17,7 +17,7 @@ import io.f12.notionlinkedblog.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 @RestController
 public class UserApiController {
 
