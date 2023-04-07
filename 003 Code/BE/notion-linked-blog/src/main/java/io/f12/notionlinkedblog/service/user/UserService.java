@@ -2,6 +2,7 @@ package io.f12.notionlinkedblog.service.user;
 
 import java.util.Optional;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +17,13 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	public Long signupByEmail(UserSignupRequestDto requestDto) {
-		User newUser = requestDto.toEntity();
-		Optional<User> foundUser = userRepository.findByEmail(newUser.getEmail());
+		Optional<User> foundUser = userRepository.findByEmail(requestDto.getEmail());
 		if (foundUser.isEmpty()) {
+			requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
+			User newUser = requestDto.toEntity();
 			User savedUser = userRepository.save(newUser);
 			return savedUser.getId();
 		}
