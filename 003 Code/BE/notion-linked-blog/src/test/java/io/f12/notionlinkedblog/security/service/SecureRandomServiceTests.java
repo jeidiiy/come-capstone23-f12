@@ -5,17 +5,14 @@ import static io.f12.notionlinkedblog.security.service.SecureRandomService.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.token.SecureRandomFactoryBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-@SpringBootTest(classes = {SecureRandomFactoryBean.class, SecureRandomService.class})
+@ExtendWith(MockitoExtension.class)
 class SecureRandomServiceTests {
 
-	@Autowired
+	@Mock
 	SecureRandomService secureRandomService;
 
 	@DisplayName("인증 코드 생성")

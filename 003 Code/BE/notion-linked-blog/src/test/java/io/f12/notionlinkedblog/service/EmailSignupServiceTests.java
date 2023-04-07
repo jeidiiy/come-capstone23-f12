@@ -1,82 +1,68 @@
 package io.f12.notionlinkedblog.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import io.f12.notionlinkedblog.domain.dummy.DummyObject;
 import io.f12.notionlinkedblog.domain.verification.EmailVerificationToken;
 import io.f12.notionlinkedblog.repository.redis.EmailVerificationTokenRepository;
-import io.f12.notionlinkedblog.security.service.SecureRandomService;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class EmailSignupServiceTests {
-	@Autowired
+	@InjectMocks
 	EmailSignupService emailSignupService;
-	@MockBean
-	JavaMailSender javaMailSender;
-	@Autowired
-	SecureRandomService secureRandomService;
-	@Autowired
+	@Mock
 	EmailVerificationTokenRepository emailVerificationTokenRepository;
 
-	@Nested
 	@DisplayName("인증 코드")
-	class VerificationCodeTests {
-		@Nested
+	@Nested
+	class VerificationCodeTests extends DummyObject {
 		@DisplayName("정상 케이스")
+		@Nested
 		class SuccessCase {
 			@DisplayName("검증 성공")
 			@Test
 			void verifyingCode() {
 				//given
-				final String email = "test3@gmail.com";
-				int randomCode = secureRandomService.generateRandomCode();
-				String code = String.format("%06d", randomCode);
+				EmailVerificationToken mockEmailVerificationToken = newMockEmailVerificationToken("1", "123456");
 
-				EmailVerificationToken verificationToken = EmailVerificationToken.builder()
-					.email(email)
-					.code(code)
-					.build();
-				emailVerificationTokenRepository.save(verificationToken);
+				// stub 1
+				given(emailVerificationTokenRepository.findById(any())).willReturn(Optional.of(
+					mockEmailVerificationToken));
 
 				//when
-				EmailVerificationToken foundedVerificationToken = emailVerificationTokenRepository.findById(
-						verificationToken.getId())
-					.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 ID입니다."));
+				boolean isVerified = emailSignupService.verifyingCode("1", "123456");
 
 				//then
-				assertThat(verificationToken.getCode()).isEqualTo(foundedVerificationToken.getCode());
+				assertThat(isVerified).isTrue();
 			}
 		}
 
-		@Nested
 		@DisplayName("비정상 케이스")
+		@Nested
 		class FailureCase {
 			@DisplayName("검증 실패")
 			@Test
 			void verifyingCode() {
 				//given
-				final String email = "test5@gmail.com";
-				int randomCode = secureRandomService.generateRandomCode();
-				String code = String.format("%06d", randomCode);
+				EmailVerificationToken mockEmailVerificationToken = newMockEmailVerificationToken("1", "123456");
 
-				EmailVerificationToken verificationToken = EmailVerificationToken.builder()
-					.email(email)
-					.code(code)
-					.build();
-				emailVerificationTokenRepository.save(verificationToken);
-				EmailVerificationToken foundedVerificationToken = emailVerificationTokenRepository.findById(
-						verificationToken.getId())
-					.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 ID입니다."));
+				// stub 1
+				given(emailVerificationTokenRepository.findById(any())).willReturn(Optional.of(
+					mockEmailVerificationToken));
 
 				//when
-				boolean isVerified = emailSignupService.verifyingCode(foundedVerificationToken.getId(), "invalidCode");
+				boolean isVerified = emailSignupService.verifyingCode("1", "987654");
 
 				//then
 				assertThat(isVerified).isFalse();

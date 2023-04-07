@@ -5,21 +5,29 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.core.token.SecureRandomFactoryBean;
+import org.springframework.test.context.ActiveProfiles;
 
+import io.f12.notionlinkedblog.config.EmbeddedRedisConfig;
+import io.f12.notionlinkedblog.config.RedisConfig;
 import io.f12.notionlinkedblog.domain.verification.EmailVerificationToken;
 import io.f12.notionlinkedblog.security.service.SecureRandomService;
 
-@Transactional
-@SpringBootTest
+@ActiveProfiles("test")
+@DataRedisTest
+@Import({
+	SecureRandomService.class,
+	SecureRandomFactoryBean.class,
+	EmbeddedRedisConfig.class,
+	RedisConfig.class
+})
 class EmailVerificationTokenRepositoryTests {
-
 	@Autowired
-	SecureRandomService secureRandomService;
-
+	private SecureRandomService secureRandomService;
 	@Autowired
-	EmailVerificationTokenRepository tokenRepository;
+	private EmailVerificationTokenRepository tokenRepository;
 
 	@DisplayName("이메일 인증을 위한 토큰 생성")
 	@Test

@@ -1,27 +1,20 @@
 package io.f12.notionlinkedblog.api;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpHeaders.*;
-import static org.springframework.http.HttpMethod.*;
-import static org.springframework.http.HttpStatus.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.net.HttpCookie;
-import java.net.URI;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import javax.servlet.http.Cookie;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import io.f12.notionlinkedblog.domain.verification.EmailVerificationToken;
 import io.f12.notionlinkedblog.repository.redis.EmailVerificationTokenRepository;
@@ -30,11 +23,12 @@ import io.f12.notionlinkedblog.service.EmailSignupService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class EmailApiControllerTests {
 	private static final String redisCookieName = "x-redis-id";
 	@Autowired
-	private TestRestTemplate testRestTemplate;
+	private MockMvc mockMvc;
 	@Autowired
 	private EmailVerificationTokenRepository emailVerificationTokenRepository;
 	@Autowired
@@ -50,7 +44,7 @@ class EmailApiControllerTests {
 		class SuccessCase {
 			@DisplayName("검증 성공")
 			@Test
-			void success() {
+			void success() throws Exception {
 				//given
 				final String url = "/api/email/code";
 				final String email = "test@gmail.com";
@@ -60,18 +54,19 @@ class EmailApiControllerTests {
 
 				EmailVerificationToken verificationToken = emailVerificationTokenRepository.save(token);
 				String redisId = verificationToken.getId();
+				Cookie cookie = new Cookie(redisCookieName, redisId);
 
-				HttpHeaders headers = new HttpHeaders();
-				headers.add(COOKIE, redisCookieName + "=" + redisId);
-				RequestEntity<String> requestEntity = new RequestEntity<>(code, headers, POST, URI.create(url));
+				given(mockEmailSignupService.verifyingCode(redisId, code)).willReturn(true);
 
 				//when
-				when(mockEmailSignupService.verifyingCode(redisId, code)).thenReturn(true);
-				ResponseEntity<String> responseEntity = testRestTemplate.postForEntity(url, requestEntity,
-					String.class);
+				ResultActions resultActions = mockMvc.perform(
+					post(url)
+						.content(code)
+						.cookie(cookie)
+				);
 
 				//then
-				assertThat(responseEntity.getStatusCode()).isEqualTo(NO_CONTENT);
+				resultActions.andExpect(status().isNoContent());
 			}
 		}
 
@@ -80,26 +75,27 @@ class EmailApiControllerTests {
 		class FailureCase {
 			@DisplayName("잘못된 ID로 인한 인증 실패")
 			@Test
-			void notProvideValidID() {
+			void notProvideValidID() throws Exception {
 				//given
 				final String url = "/api/email/code";
 				final String redisId = "invalidID";
 
-				HttpHeaders headers = new HttpHeaders();
-				headers.add("Cookie", redisCookieName + "=" + redisId);
-				RequestEntity<String> requestEntity = new RequestEntity<>(headers, POST, URI.create(url));
+				Cookie cookie = new Cookie(redisCookieName, redisId);
 
 				//when
-				ResponseEntity<String> responseEntity = testRestTemplate.postForEntity(url, requestEntity,
-					String.class);
+				ResultActions resultActions = mockMvc.perform(
+					post(url)
+						.content("123456")
+						.cookie(cookie)
+				);
 
 				//then
-				assertThat(responseEntity.getStatusCode()).isEqualTo(BAD_REQUEST);
+				resultActions.andExpect(status().isBadRequest());
 			}
 
 			@DisplayName("잘못된 인증 코드로 인한 인증 실패")
 			@Test
-			void notProvideValidCode() {
+			void notProvideValidCode() throws Exception {
 				//given
 				final String url = "/api/email/code";
 				final String email = "test@gmail.com";
@@ -108,17 +104,17 @@ class EmailApiControllerTests {
 				EmailVerificationToken token = EmailVerificationToken.builder().email(email).code(code).build();
 				emailVerificationTokenRepository.save(token);
 				final String redisId = token.getId();
-
-				HttpHeaders headers = new HttpHeaders();
-				headers.add("Cookie", redisCookieName + "=" + redisId);
-				RequestEntity<String> requestEntity = new RequestEntity<>(headers, POST, URI.create(url));
+				Cookie cookie = new Cookie(redisCookieName, redisId);
 
 				//when
-				ResponseEntity<String> responseEntity = testRestTemplate.postForEntity(url, requestEntity,
-					String.class);
+				ResultActions resultActions = mockMvc.perform(
+					post(url)
+						.content(code)
+						.cookie(cookie)
+				);
 
 				//then
-				assertThat(responseEntity.getStatusCode()).isEqualTo(BAD_REQUEST);
+				resultActions.andExpect(status().isBadRequest());
 			}
 		}
 	}
@@ -131,26 +127,20 @@ class EmailApiControllerTests {
 		class SuccessCase {
 			@DisplayName("전송 성공")
 			@Test
-			void success() {
+			void success() throws Exception {
 				//given
 				final String email = "test@gmail.com";
 				final String tmpRedisId = "redisId";
+				given(mockEmailSignupService.sendMail(email)).willReturn(tmpRedisId);
 
 				//when
-				when(mockEmailSignupService.sendMail(email)).thenReturn(tmpRedisId);
-				ResponseEntity<String> responseEntity = testRestTemplate.postForEntity("/api/email", email,
-					String.class);
-
-				List<HttpCookie> httpCookies = HttpCookie.parse(
-					Objects.requireNonNull(responseEntity.getHeaders().getFirst(SET_COOKIE)));
-				Optional<HttpCookie> redisCookieOptional = httpCookies.stream()
-					.filter(cookie -> cookie.getName().equals(redisCookieName))
-					.findFirst();
+				ResultActions resultActions = mockMvc.perform(post("/api/email").content(email));
 
 				//then
-				assertThat(responseEntity.getStatusCode()).isEqualTo(NO_CONTENT);
-				assertThat(redisCookieOptional.isPresent()).isTrue();
-				assertThat(redisCookieOptional.get().getValue()).isEqualTo(tmpRedisId);
+				resultActions
+					.andExpect(status().isNoContent())
+					.andExpect(cookie().exists(redisCookieName))
+					.andExpect(cookie().value(redisCookieName, tmpRedisId));
 			}
 		}
 
@@ -159,30 +149,28 @@ class EmailApiControllerTests {
 		class FailureCase {
 			@DisplayName("이메일이 입력되지 않아 실패")
 			@Test
-			void isEmpty() {
+			void isEmpty() throws Exception {
 				//given
 				final String email = "";
 
 				//when
-				ResponseEntity<String> responseEntity = testRestTemplate.postForEntity("/api/email", email,
-					String.class);
+				ResultActions resultActions = mockMvc.perform(post("/api/email").content(email));
 
 				//then
-				assertThat(responseEntity.getStatusCode()).isEqualTo(BAD_REQUEST);
+				resultActions.andExpect(status().isBadRequest());
 			}
 
 			@DisplayName("이메일 형식에 맞지 않아 실패")
 			@Test
-			void isInvalidFormat() {
+			void isInvalidFormat() throws Exception {
 				//given
 				final String email = "invali\"d@domain.com";
 
 				//when
-				ResponseEntity<String> responseEntity = testRestTemplate.postForEntity("/api/email", email,
-					String.class);
+				ResultActions resultActions = mockMvc.perform(post("/api/email").content(email));
 
 				//then
-				assertThat(responseEntity.getStatusCode()).isEqualTo(BAD_REQUEST);
+				resultActions.andExpect(status().isBadRequest());
 			}
 		}
 	}
