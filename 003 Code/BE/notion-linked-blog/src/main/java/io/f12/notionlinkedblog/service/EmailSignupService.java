@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.f12.notionlinkedblog.domain.verification.EmailVerificationToken;
-import io.f12.notionlinkedblog.repository.redis.EmailVerificationTokenRepository;
 import io.f12.notionlinkedblog.security.service.SecureRandomService;
+import io.f12.notionlinkedblog.service.redis.EmailVerificationTokenService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -16,22 +16,20 @@ import lombok.RequiredArgsConstructor;
 public class EmailSignupService {
 	private final JavaMailSender javaMailSender;
 	private final SecureRandomService secureRandomService;
-	private final EmailVerificationTokenRepository emailVerificationTokenRepository;
+	private final EmailVerificationTokenService emailVerificationTokenService;
 
+	@Transactional(readOnly = true)
 	public boolean verifyingCode(final String id, final String code) {
-		EmailVerificationToken verificationToken = emailVerificationTokenRepository.findById(id)
-			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 ID입니다."));
-
+		EmailVerificationToken verificationToken = emailVerificationTokenService.findById(id);
 		return verificationToken.getCode().equals(code);
 	}
 
 	public String sendMail(final String email) {
-		int randomCode = secureRandomService.generateRandomCode();
-		String code = String.format("%06d", randomCode);
+		String code = secureRandomService.generateRandomCodeString();
 		SimpleMailMessage mail = createVerificationMail(email, code);
 
 		EmailVerificationToken verificationToken = EmailVerificationToken.builder().email(email).code(code).build();
-		emailVerificationTokenRepository.save(verificationToken);
+		emailVerificationTokenService.save(verificationToken);
 
 		javaMailSender.send(mail);
 
@@ -40,9 +38,9 @@ public class EmailSignupService {
 
 	private SimpleMailMessage createVerificationMail(final String email, String code) {
 		SimpleMailMessage message = new SimpleMailMessage();
+
 		message.setTo(email);
 		message.setSubject("[노션 연동 블로그 서비스] 인증 코드입니다.");
-
 		message.setText("[" + code + "] 메일 확인 인증 코드입니다.");
 
 		return message;

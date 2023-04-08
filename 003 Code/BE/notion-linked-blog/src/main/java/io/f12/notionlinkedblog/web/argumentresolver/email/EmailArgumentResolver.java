@@ -42,6 +42,10 @@ public class EmailArgumentResolver implements HandlerMethodArgumentResolver {
 		String email = sb.toString();
 		boolean matches = pattern.matcher(email).matches();
 
-		return matches ? email : null;
+		if (matches) {
+			return email;
+		}
+
+		throw new IllegalArgumentException("잘못된 이메일 형식입니다.");
 	}
 }

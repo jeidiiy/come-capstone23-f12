@@ -44,16 +44,11 @@ public class EmailApiController {
 
 	@PostMapping
 	public ResponseEntity<String> sendRandomCode(@Email String email) {
-		if (email != null) {
-			String redisId = emailSignupService.sendMail(email);
-			ResponseCookie cookie = ResponseCookie.from(redisCookieName, redisId)
-				.httpOnly(true)
-				.maxAge(300L)
-				.build();
-			return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
-		}
-
-		throw new IllegalArgumentException("잘못된 이메일 형식입니다.");
+		String redisId = emailSignupService.sendMail(email);
+		ResponseCookie cookie = ResponseCookie.from(redisCookieName, redisId)
+			.httpOnly(true)
+			.maxAge(300L)
+			.build();
+		return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
 	}
-
 }

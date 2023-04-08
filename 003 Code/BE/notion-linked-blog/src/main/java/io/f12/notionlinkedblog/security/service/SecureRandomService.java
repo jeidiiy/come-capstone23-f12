@@ -16,6 +16,10 @@ public class SecureRandomService {
 	public static final int DEFAULT_SECURE_BOUND = 1_000_000;
 	private final SecureRandomFactoryBean secureRandomFactoryBean;
 
+	public String generateRandomCodeString() {
+		return String.format("%06d", generateRandomCode());
+	}
+
 	public int generateRandomCode() {
 		return generateRandomCode(DEFAULT_SECURE_BOUND);
 	}
