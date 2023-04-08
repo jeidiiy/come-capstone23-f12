@@ -1,7 +1,5 @@
 package io.f12.notionlinkedblog.service.user;
 
-import java.util.Optional;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,14 +18,19 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 
 	public Long signupByEmail(UserSignupRequestDto requestDto) {
-		Optional<User> foundUser = userRepository.findByEmail(requestDto.getEmail());
-		if (foundUser.isEmpty()) {
-			requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
-			User newUser = requestDto.toEntity();
-			User savedUser = userRepository.save(newUser);
-			return savedUser.getId();
-		}
+		checkEmailIsDuplicated(requestDto.getEmail());
 
-		throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+		requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
+		User newUser = requestDto.toEntity();
+		User savedUser = userRepository.save(newUser);
+
+		return savedUser.getId();
+	}
+
+	private void checkEmailIsDuplicated(final String email) {
+		boolean isPresent = userRepository.findByEmail(email).isPresent();
+		if (isPresent) {
+			throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+		}
 	}
 }
