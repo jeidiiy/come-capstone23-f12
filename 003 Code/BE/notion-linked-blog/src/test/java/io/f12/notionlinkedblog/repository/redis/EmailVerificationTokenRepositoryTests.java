@@ -32,9 +32,8 @@ class EmailVerificationTokenRepositoryTests {
 	@DisplayName("이메일 인증을 위한 토큰 생성")
 	@Test
 	void save() {
-		int randomCode = secureRandomService.generateRandomCode();
 		String email = "test@gmail.com";
-		String code = String.format("%06d", randomCode);
+		String code = secureRandomService.generateRandomCodeString();
 
 		EmailVerificationToken token = EmailVerificationToken.builder().email(email).code(code).build();
 		EmailVerificationToken savedToken = tokenRepository.save(token);

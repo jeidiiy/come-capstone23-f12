@@ -49,7 +49,7 @@ class EmailApiControllerTests {
 				final String url = "/api/email/code";
 				final String email = "test@gmail.com";
 
-				String code = String.format("%06d", secureRandomService.generateRandomCode());
+				String code = secureRandomService.generateRandomCodeString();
 				EmailVerificationToken token = EmailVerificationToken.builder().email(email).code(code).build();
 
 				EmailVerificationToken verificationToken = emailVerificationTokenRepository.save(token);
@@ -100,7 +100,7 @@ class EmailApiControllerTests {
 				final String url = "/api/email/code";
 				final String email = "test@gmail.com";
 
-				String code = String.format("%06d", secureRandomService.generateRandomCode());
+				String code = secureRandomService.generateRandomCodeString();
 				EmailVerificationToken token = EmailVerificationToken.builder().email(email).code(code).build();
 				emailVerificationTokenRepository.save(token);
 				final String redisId = token.getId();
