@@ -46,7 +46,7 @@ class UserApiControllerTests {
 					.build();
 				String requestBody = om.writeValueAsString(userSignupRequestDto);
 				MockHttpSession mockHttpSession = new MockHttpSession();
-				mockHttpSession.setAttribute(emailVerifiedAttr, true);
+				mockHttpSession.setAttribute(emailVerifiedAttr, "verified");
 
 				//when
 				ResultActions resultActions = mockMvc.perform(

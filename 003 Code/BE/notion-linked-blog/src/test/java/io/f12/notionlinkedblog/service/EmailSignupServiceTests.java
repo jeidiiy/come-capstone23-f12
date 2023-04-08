@@ -3,8 +3,6 @@ package io.f12.notionlinkedblog.service;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,14 +13,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.f12.notionlinkedblog.domain.dummy.DummyObject;
 import io.f12.notionlinkedblog.domain.verification.EmailVerificationToken;
-import io.f12.notionlinkedblog.repository.redis.EmailVerificationTokenRepository;
+import io.f12.notionlinkedblog.service.redis.EmailVerificationTokenService;
 
 @ExtendWith(MockitoExtension.class)
 class EmailSignupServiceTests {
 	@InjectMocks
 	EmailSignupService emailSignupService;
 	@Mock
-	EmailVerificationTokenRepository emailVerificationTokenRepository;
+	EmailVerificationTokenService emailVerificationTokenService;
 
 	@DisplayName("인증 코드")
 	@Nested
@@ -37,8 +35,7 @@ class EmailSignupServiceTests {
 				EmailVerificationToken mockEmailVerificationToken = newMockEmailVerificationToken("1", "123456");
 
 				// stub 1
-				given(emailVerificationTokenRepository.findById(any())).willReturn(Optional.of(
-					mockEmailVerificationToken));
+				given(emailVerificationTokenService.findById(any())).willReturn(mockEmailVerificationToken);
 
 				//when
 				boolean isVerified = emailSignupService.verifyingCode("1", "123456");
@@ -58,8 +55,7 @@ class EmailSignupServiceTests {
 				EmailVerificationToken mockEmailVerificationToken = newMockEmailVerificationToken("1", "123456");
 
 				// stub 1
-				given(emailVerificationTokenRepository.findById(any())).willReturn(Optional.of(
-					mockEmailVerificationToken));
+				given(emailVerificationTokenService.findById(any())).willReturn(mockEmailVerificationToken);
 
 				//when
 				boolean isVerified = emailSignupService.verifyingCode("1", "987654");

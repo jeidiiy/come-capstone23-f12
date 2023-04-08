@@ -24,21 +24,22 @@ public class EmailApiController {
 	private final EmailSignupService emailSignupService;
 
 	@PostMapping("/code")
-	public ResponseEntity<String> verifyingCode(
+	public ResponseEntity<String> verifyCode(
 		HttpSession session, @CookieValue(redisCookieName) String redisId, @RequestBody String code) {
+		verifyCodeElseThrowIllegalArgumentException(redisId, code);
+
+		ResponseCookie redisCookie = ResponseCookie.from(redisCookieName, redisId).maxAge(0L).build();
+		session.setAttribute(emailVerifiedAttr, "verified");
+
+		return ResponseEntity.noContent()
+			.header(HttpHeaders.SET_COOKIE, redisCookie.toString()).build();
+	}
+
+	private void verifyCodeElseThrowIllegalArgumentException(String redisId, String code) {
 		boolean isVerified = emailSignupService.verifyingCode(redisId, code);
-		if (isVerified) {
-			ResponseCookie redisCookie = ResponseCookie.from(redisCookieName, redisId)
-				.maxAge(0L)
-				.build();
-
-			session.setAttribute(emailVerifiedAttr, true);
-
-			return ResponseEntity.noContent()
-				.header(HttpHeaders.SET_COOKIE, redisCookie.toString()).build();
+		if (!isVerified) {
+			throw new IllegalArgumentException("잘못된 인증 코드입니다.");
 		}
-
-		throw new IllegalArgumentException("잘못된 인증 코드입니다.");
 	}
 
 	@PostMapping
@@ -54,4 +55,5 @@ public class EmailApiController {
 
 		throw new IllegalArgumentException("잘못된 이메일 형식입니다.");
 	}
+
 }

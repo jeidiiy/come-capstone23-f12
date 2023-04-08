@@ -27,18 +27,20 @@ public class UserApiController {
 
 	@PostMapping("/email/signup")
 	public ResponseEntity<UserSignupResponseDto> signupByEmail(
-		@RequestBody @Validated UserSignupRequestDto requestDto,
-		BindingResult bindingResult,
-		HttpSession httpSession) {
-		boolean emailVerified = (boolean)httpSession.getAttribute(emailVerifiedAttr);
+		@RequestBody @Validated UserSignupRequestDto requestDto, BindingResult bindingResult, HttpSession httpSession) {
+		verifyEmailIsVerifiedElseThrowIllegalStateException(httpSession);
 
-		if (emailVerified) {
-			Long savedId = userService.signupByEmail(requestDto);
-			UserSignupResponseDto responseDto = UserSignupResponseDto.builder().id(savedId).build();
-			httpSession.removeAttribute(emailVerifiedAttr);
-			return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+		Long savedId = userService.signupByEmail(requestDto);
+		UserSignupResponseDto responseDto = UserSignupResponseDto.builder().id(savedId).build();
+		httpSession.removeAttribute(emailVerifiedAttr);
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+	}
+
+	private void verifyEmailIsVerifiedElseThrowIllegalStateException(HttpSession session) {
+		String isVerified = (String)session.getAttribute(emailVerifiedAttr);
+		if (isVerified == null) {
+			throw new IllegalStateException("이메일 검증이 되지 않았습니다.");
 		}
-
-		throw new IllegalStateException("이메일 검증이 되지 않았습니다.");
 	}
 }
