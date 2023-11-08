@@ -7,19 +7,17 @@ import SignupForm from "@/components/auth/SignupForm";
 import {checkLoginStatus} from "@/apis/user";
 import {UserState, login} from "@/redux/userSlice";
 import {RootState} from "@/redux/store";
+import {BulbFilled, BulbOutlined} from "@ant-design/icons";
 import styled from "styled-components";
 import {useDispatch, useSelector} from "react-redux";
 import MenuItemsDropdown from "./MenuItemsDropdown";
 
-const {Header} = Layout;
-
 const {Text} = Typography;
 
-const StyledHeader = styled(Header)`
+const StyledHeader = styled(Layout)`
   display: flex;
   justify-content: center;
-  padding: 0;
-  background-color: inherit;
+	height: 64px;
 `;
 
 const StyledHeaderRow = styled(Row)`
@@ -27,19 +25,7 @@ const StyledHeaderRow = styled(Row)`
   max-width: 1728px;
   justify-content: space-between;
   width: 100%;
-
-  @media screen and (max-width: 1872px) {
-    width: calc(352px * 4 - 32px);
-  }
-
-  @media screen and (max-width: 1520px) {
-    width: calc(352px * 3 - 32px);
-  }
-
-  @media screen and (max-width: 1058px) {
-    width: 100vw;
-    padding: 0 16px;
-  }
+	padding: 0 50px;
 `;
 
 const StyledCol = styled(Col)`
@@ -54,7 +40,7 @@ const StyledLink = styled(Link)`
   width: 70px;
 `;
 
-function AppHeader() {
+function AppHeader({isDark, setIsDark}) {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [existAccount, setExistAccount] = useState(true);
 	const {user} = useSelector<RootState, UserState>(state => state.user);
@@ -96,10 +82,14 @@ function AppHeader() {
 						<Text>NLB</Text>
 					</StyledLink>
 				</StyledCol>
-				<Col>
+				<Col style={{display: "flex", justifyContent: "space-around", width: "100px"}}>
+					<Button
+						style={{background: "none"}}
+						icon={isDark ? <BulbFilled /> : <BulbOutlined />}
+						onClick={() => setIsDark(prev => !prev)}></Button>
 					{!user ?
 						<Button type="primary" onClick={showModal}>로그인</Button> :
-						<MenuItemsDropdown />
+						<MenuItemsDropdown isDark={isDark} />
 					}
 					<Modal title={existAccount ? "로그인" : "회원가입"} open={isModalOpen} footer={null} onCancel={handleCancel}>
 						{existAccount ?

@@ -4,7 +4,7 @@ import React, {useState} from "react";
 import dynamic from "next/dynamic";
 import handleInput from "@/components/auth/common";
 import PostWriteSetting from "@/components/post/PostWriteSetting";
-import {Button} from "antd";
+import {Button, Layout} from "antd";
 import Link from "next/link";
 import {
 	ButtonSpace, StyledInput,
@@ -22,7 +22,7 @@ const PostEditor = dynamic(
 	{ssr: false},
 );
 
-const Write = () => {
+const Write = ({isDark}) => {
 	const router = useRouter();
 	const post = router.query;
 	const [title, onChangeTitle] = handleInput(post.title);
@@ -72,18 +72,20 @@ const Write = () => {
 	}
 
 	return (
-		isDoneWrite ?
-			<PostWriteSetting title={title} content={content} isDoneWritePost={isDoneWritePost} /> :
-			<WriteDiv>
-				<StyledInput bordered={false} value={title} placeholder="제목을 입력하세요" onChange={onChangeTitle} />
-				<PostEditor content={content} editContent={editContent} />
-				<ButtonSpace align="center">
-					<Link href={"/"}><Button>나가기</Button></Link>
-					<StyledButtonDiv>
-						<Button type="primary" onClick={updatePost}>수정완료</Button>
-					</StyledButtonDiv>
-				</ButtonSpace>
-			</WriteDiv>
+		<Layout>
+			{isDoneWrite ?
+				<PostWriteSetting title={title} content={content} isDoneWritePost={isDoneWritePost} /> :
+				<WriteDiv>
+					<StyledInput bordered={false} value={title} placeholder="제목을 입력하세요" onChange={onChangeTitle} />
+					<PostEditor content={content} editContent={editContent} isDark={isDark} />
+					<ButtonSpace align="center">
+						<Link href={"/"}><Button>나가기</Button></Link>
+						<StyledButtonDiv>
+							<Button type="primary" onClick={updatePost}>수정하기</Button>
+						</StyledButtonDiv>
+					</ButtonSpace>
+				</WriteDiv>}
+		</Layout>
 	);
 };
 

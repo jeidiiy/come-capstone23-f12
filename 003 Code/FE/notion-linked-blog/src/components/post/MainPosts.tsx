@@ -1,5 +1,5 @@
 import {useState, useEffect, useRef} from "react";
-import {Col, Row, Space, Spin, Typography} from "antd";
+import {Col, Layout, Row, Space, Spin, Typography} from "antd";
 import {CloseOutlined} from "@ant-design/icons";
 import Link from "next/link";
 import styled from "styled-components";
@@ -64,7 +64,11 @@ export default function MainPosts() {
 					</Link>
 				))}
 			</StyledContentRow>
-			{isLoading && <StyledSpin size="large" tip="Loading" />}
+			{isLoading &&
+				<Layout style={{height: "100vh"}}>
+					<StyledSpin size="large" tip="Loading" />
+				</Layout>
+			}
 			{errorMsg &&
 				<Space align="center" direction="vertical">
 					<StyledCloseOutlined />

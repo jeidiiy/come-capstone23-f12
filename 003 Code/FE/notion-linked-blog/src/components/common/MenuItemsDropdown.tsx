@@ -13,27 +13,37 @@ const StyledSpace = styled(Space)`
   cursor: pointer;
 `;
 
-const StyledUserOutlined = styled(UserOutlined)`
+interface IStyledUserOutlined {
+	isDark: boolean;
+}
+
+const StyledUserOutlined = styled(UserOutlined) <IStyledUserOutlined>`
   cursor: pointer;
+	color: ${props => (props.isDark ? "#fff" : "#000")};
 `;
 
-const StyledDownOutlined = styled(DownOutlined)`
-  cursor: pointer;
+interface IStyledDownOutlined {
+	isDark: boolean;
+}
+
+const StyledDownOutlined = styled(DownOutlined) <IStyledDownOutlined>`
+	cursor: pointer;
+	color: ${props => (props.isDark ? "#fff" : "#000")};
 `;
 
-export default function MenuItemsDropdown() {
+export default function MenuItemsDropdown({isDark}) {
 	const username = useSelector<RootState, string>(state => state.user.user.username);
 
 	const items = Object.entries(data).map(([text, href]) => ({
-		label: <Link href={href === "/myblog" ? `/${username}` : `${href}`}><Text>{text}</Text></Link>,
+		label: <Link href={href === "/myblog" ? `/ ${username} ` : `${href} `}><Text>{text}</Text></Link>,
 		key: href,
 	}));
 
 	return (
 		<Dropdown menu={{items}} trigger={["click"]}>
 			<StyledSpace>
-				<StyledUserOutlined />
-				<StyledDownOutlined />
+				<StyledUserOutlined isDark={isDark} />
+				<StyledDownOutlined isDark={isDark} />
 			</StyledSpace>
 		</Dropdown >
 	);

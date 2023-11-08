@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import styled from "styled-components";
-import {Button, Modal, Space} from "antd";
+import {Button, Modal, Space, Typography} from "antd";
 import {useState} from "react";
 import {requestDeletePostAPI} from "@/apis/post";
 import {useRouter} from "next/router";
@@ -39,20 +39,13 @@ const StyledContainer = styled.div`
 const StyledTop = styled.div`
 `;
 
-const StyledTitle = styled.div`
-  font-size: 3rem;
-`;
-
-const StyledSubTitle = styled.div`
-`;
-
 const StyledButtonDiv = styled.div`
   & > Button {
     margin: 10px;
   }
 `;
 
-export default function PostViewer({post}) {
+export default function PostViewer({post, isDark}) {
 	const router = useRouter();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const {user} = useSelector<RootState, UserState>(state => state.user);
@@ -75,14 +68,14 @@ export default function PostViewer({post}) {
 	};
 
 	return (
-		<Space direction="vertical" align="center">
-			<StyledContainer data-color-mode="light">
+		<Space direction="vertical" align="center" style={{height: "100vh"}}>
+			<StyledContainer data-color-mode={isDark ? "dark" : "light"} >
 				<StyledTop>
-					<StyledTitle>{post.title}</StyledTitle>
-					<StyledSubTitle>{post.author} · {post.createdAt}</StyledSubTitle>
+					<Typography.Title level={1}>{post.title}</Typography.Title>
+					<Typography.Text>{post.author} · {post.createdAt}</Typography.Text>
 				</StyledTop>
 				<div className="wmde-markdown-var" />
-				<StyledMDPreview source={post.content} />
+				<StyledMDPreview source={post.content} data-color-mode={isDark ? "dark" : "light"} />
 				{user?.username === post.author &&
 					<StyledButtonDiv>
 						<Link href={{
@@ -92,13 +85,15 @@ export default function PostViewer({post}) {
 								title: post.title,
 								content: post.content,
 								author: post.author,
+								requestThumbnailLink: post.requestThumbnailLink,
+								description: post.description,
 							},
 						}} as={`/write/${post.postId}`}>
 							<Button type="primary">
 								수정하기
 							</Button>
 						</Link>
-						<Button type="primary" onClick={showModal}>
+						<Button type="primary" danger onClick={showModal}>
 							삭제하기
 						</Button>
 						<Modal title="포스트 삭제" open={isModalOpen} onOk={handleOk} onCancel={handleCancel} okText="확인" cancelText="취소">

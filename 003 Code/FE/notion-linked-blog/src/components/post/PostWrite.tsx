@@ -64,6 +64,7 @@ const PostWrite = props => {
 				preview="live"
 				// height %로 설정할 경우 드래그바 사라짐
 				height={window.innerHeight - 250}
+				data-color-mode={props.isDark ? "dark" : "light"}
 			/>
 		</EditorCover>
 	);

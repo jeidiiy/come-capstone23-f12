@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import handleInput from "@/components/auth/common";
-import {Input, Space, Divider, Button, Radio, Form, List, Typography} from "antd";
+import {Input, Space, Divider, Button, Radio, Form, List, Typography, Layout} from "antd";
 import Link from "next/link";
 import {FolderAddOutlined, GlobalOutlined, LockOutlined, SettingFilled} from "@ant-design/icons";
 import {requestSubmitPostAPI} from "@/apis/post";
@@ -97,7 +97,7 @@ const PostWriteSetting = props => {
 	};
 
 	return (
-		<div style={{height: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
+		<Layout style={{display: "flex", justifyContent: "center", alignItems: "center", height: "100vh"}}>
 			<ContainerSpace split={<Divider type={window.innerWidth >= 768 ? "vertical" : "horizontal"} />}>
 				<Space direction="vertical">
 					<Typography.Title level={4}>포스트 미리보기</Typography.Title>
@@ -138,9 +138,9 @@ const PostWriteSetting = props => {
 							>시리즈에 추가하기
 							</Button> :
 								<div style={{width: "100%"}}>
-									<div style={{height: "48px", borderRadius: "4px", backgroundColor: "white"}}>
-										<div style={{height: "100%", padding: "0 1rem", fontSize: "1.125rem", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-											<span>{selectedSeriesTitle}</span>
+									<div style={{height: "48px", borderRadius: "4px"}}>
+										<div style={{height: "100%", padding: "0 1rem", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+											<Typography.Text style={{fontSize: "2rem"}}>{selectedSeriesTitle}</Typography.Text>
 											<Button icon={<SettingFilled />} onClick={() => setIsOpenSereisCreate(true)}></Button>
 										</div>
 									</div>
@@ -180,7 +180,7 @@ const PostWriteSetting = props => {
 						</Form>
 						<div style={{height: "250px", position: "relative"}}>
 							<List
-								style={{backgroundColor: "white", maxHeight: "100%", overflow: "auto"}}
+								style={{maxHeight: "100%", overflow: "auto"}}
 								size="small"
 								bordered
 								dataSource={series}
@@ -214,7 +214,7 @@ const PostWriteSetting = props => {
 					</Space>
 				}
 			</ContainerSpace>
-		</div >
+		</Layout>
 	);
 };
 

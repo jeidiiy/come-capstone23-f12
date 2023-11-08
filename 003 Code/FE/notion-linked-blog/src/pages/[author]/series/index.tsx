@@ -100,7 +100,7 @@ export default function Series() {
 
 	return (
 		<AppLayout>
-			<Space direction="vertical">
+			<Space direction="vertical" style={{height: "100vh"}}>
 				<MyInfoSpace>
 					<StyledAvatar src={profile} />
 					<Space direction="vertical">

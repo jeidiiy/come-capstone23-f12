@@ -5,7 +5,7 @@ import AppLayout from "@/components/common/AppLayout";
 import PostViewer from "@/components/post/PostViewer";
 import convertKRTimeStyle from "@/utils/time";
 
-export default function Page() {
+export default function Page({isDark}) {
 	const router = useRouter();
 	const [post, setPost] = useState({});
 
@@ -25,7 +25,7 @@ export default function Page() {
 
 	return (
 		<AppLayout>
-			<PostViewer post={post} />
+			<PostViewer post={post} isDark={isDark} />
 		</AppLayout>
 	);
 }

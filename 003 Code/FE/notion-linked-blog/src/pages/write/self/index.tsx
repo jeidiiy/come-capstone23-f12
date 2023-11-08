@@ -7,18 +7,24 @@ import dynamic from "next/dynamic";
 import handleInput from "@/components/auth/common";
 import {
 	ButtonSpace,
-	TempButton,
 	WriteDiv,
 	StyledInput,
 } from "@/components/post/Post";
-import {Button} from "antd";
+import {Button, Layout} from "antd";
+import styled from "styled-components";
 
 const PostEditor = dynamic(
 	() => import("@/components/post/PostWrite"),
 	{ssr: false},
 );
 
-export default function WritingSelf() {
+const StyledButtonDiv = styled.div`
+& > Button {
+	margin: 10px;
+}
+`;
+
+export default function WritingSelf({isDark}) {
 	const [title, onChangeTitle] = handleInput("");
 	const [content, setContent] = useState("**내용을 작성해주세요**");
 	const [isDoneWrite, setIsDoneWrite] = useState(false);
@@ -32,18 +38,20 @@ export default function WritingSelf() {
 	};
 
 	return (
-		isDoneWrite ?
-			<PostWriteSetting title={title} content={content} isDoneWritePost={isDoneWritePost} /> :
-			<WriteDiv>
-				<StyledInput bordered={false} value={title} placeholder="제목을 입력하세요" onChange={onChangeTitle} />
-				<PostEditor content={content} editContent={editContent} />
-				<ButtonSpace align="center">
-					<Link href={"/"}><Button>나가기</Button></Link>
-					<div>
-						<TempButton type="primary">임시저장</TempButton>
-						<Button type="primary" onClick={isDoneWritePost}>출간하기</Button>
-					</div>
-				</ButtonSpace>
-			</WriteDiv>
+		<Layout style={{height: "100vh"}}>
+			{isDoneWrite ?
+				<PostWriteSetting
+					title={title} content={content} isDoneWritePost={isDoneWritePost} isDark={isDark} /> :
+				<WriteDiv>
+					<StyledInput bordered={false} value={title} placeholder="제목을 입력하세요" onChange={onChangeTitle} />
+					<PostEditor content={content} editContent={editContent} isDark={isDark} />
+					<ButtonSpace align="center">
+						<Link href={"/"}><Button>나가기</Button></Link>
+						<StyledButtonDiv>
+							<Button type="primary" onClick={isDoneWritePost}>출간하기</Button>
+						</StyledButtonDiv>
+					</ButtonSpace>
+				</WriteDiv>}
+		</Layout>
 	);
 }
